@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoML Pipeline - Automated Machine Learning</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <h1>🤖 AutoML Pipeline</h1>
+                <p>Automated Machine Learning Made Easy</p>
+            </div>
+            <div class="navbar-info">
+                <span id="session-info">Ready to upload</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Upload Section -->
+        <section id="upload-section" class="section active">
+            <div class="section-header">
+                <h2>Step 1: Upload Your Data</h2>
+                <p>Upload a CSV or Excel file to begin the AutoML pipeline</p>
+            </div>
+
+            <div class="upload-area" id="upload-area">
+                <div class="upload-icon">📁</div>
+                <h3>Drag and drop your file here</h3>
+                <p>or</p>
+                <label for="file-input" class="btn btn-primary">Browse Files</label>
+                <input type="file" id="file-input" accept=".csv,.xlsx,.xls" hidden>
+                <p class="upload-info">Supported formats: CSV, Excel (.xlsx, .xls)</p>
+            </div>
+
+            <div id="upload-loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Uploading and analyzing your data...</p>
+            </div>
+
+            <div id="upload-error" class="alert alert-error hidden"></div>
+        </section>
+
+        <!-- Data Analysis Section -->
+        <section id="analysis-section" class="section hidden">
+            <div class="section-header">
+                <h2>Step 2: Data Analysis & Preprocessing</h2>
+                <p>Review your data and perform necessary preprocessing</p>
+            </div>
+
+            <div class="grid-2">
+                <!-- Data Overview -->
+                <div class="card">
+                    <h3>📊 Data Overview</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Rows:</span>
+                            <span class="value" id="row-count">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Columns:</span>
+                            <span class="value" id="col-count">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Duplicates:</span>
+                            <span class="value" id="duplicate-count">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Numeric Cols:</span>
+                            <span class="value" id="numeric-count">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Categorical Cols:</span>
+                            <span class="value" id="categorical-count">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Missing Values -->
+                <div class="card">
+                    <h3>⚠️ Missing Values</h3>
+                    <div id="missing-values-summary"></div>
+                </div>
+            </div>
+
+            <!-- Data Preview -->
+            <div class="card">
+                <h3>👁️ Data Preview</h3>
+                <div class="table-container">
+                    <table id="data-preview-table" class="data-table">
+                        <thead></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Preprocessing Options -->
+            <div class="card">
+                <h3>🔧 Preprocessing Options</h3>
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label for="missing-method">Handle Missing Values:</label>
+                        <select id="missing-method">
+                            <option value="mean">Mean (Numeric)</option>
+                            <option value="median">Median (Numeric)</option>
+                            <option value="mode">Mode (Most Frequent)</option>
+                            <option value="forward_fill">Forward Fill</option>
+                            <option value="knn">KNN Imputation</option>
+                            <option value="drop">Drop Missing Rows</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="missing-threshold">Drop Columns with Missing % > :</label>
+                        <input type="number" id="missing-threshold" value="50" min="0" max="100">
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="handleMissingValues()">
+                        Apply Missing Value Strategy
+                    </button>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="removeDuplicates()">
+                        🗑️ Remove Duplicates
+                    </button>
+                    <button class="btn btn-secondary" onclick="encodeCategorical()">
+                        🏷️ Encode Categorical
+                    </button>
+                </div>
+
+                <div class="control-group" style="margin-top: 15px;">
+                    <label for="scaling-method">Scale Features:</label>
+                    <select id="scaling-method">
+                        <option value="standard">Standard Scaling (Z-score)</option>
+                        <option value="minmax">Min-Max Scaling (0-1)</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-secondary" onclick="scaleFeatures()">
+                    📏 Scale Features
+                </button>
+            </div>
+
+            <!-- Processing Status -->
+            <div id="processing-status" class="alert alert-info hidden"></div>
+
+            <!-- Next Button -->
+            <button class="btn btn-primary btn-large" onclick="goToMLSection()">
+                Next: Train Models →
+            </button>
+        </section>
+
+        <!-- ML Training Section -->
+        <section id="ml-section" class="section hidden">
+            <div class="section-header">
+                <h2>Step 3: Automatic Model Training</h2>
+                <p>Select target column and train multiple ML models automatically</p>
+            </div>
+
+            <div class="card">
+                <h3>⚙️ Model Training Configuration</h3>
+                <div class="control-group">
+                    <label for="target-column">Select Target Column:</label>
+                    <select id="target-column">
+                        <option value="">-- Choose a column --</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" onclick="trainModels()">
+                    🚀 Train Models
+                </button>
+            </div>
+
+            <div id="training-loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Training multiple models... This may take a moment.</p>
+            </div>
+
+            <div id="training-error" class="alert alert-error hidden"></div>
+
+            <!-- Models Information Section -->
+            <div id="models-info-section" class="hidden">
+                <!-- Task Type -->
+                <div class="card">
+                    <h3>📌 Task Type</h3>
+                    <div class="task-type" id="task-type-display">-</div>
+                </div>
+
+                <!-- Best Model -->
+                <div class="card">
+                    <h3>🏆 Best Model</h3>
+                    <div id="best-model-info"></div>
+                </div>
+
+                <!-- Models Comparison -->
+                <div class="card">
+                    <h3>📈 Models Comparison</h3>
+                    <div class="table-container">
+                        <table id="models-table" class="data-table">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Feature Importance -->
+                <div class="card">
+                    <h3>⭐ Feature Importance</h3>
+                    <canvas id="feature-importance-chart"></canvas>
+                    <div id="feature-importance-list"></div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="button-group" id="nav-buttons" style="display: none;">
+                <button class="btn btn-secondary" onclick="goToAnalysisSection()">
+                    ← Back: Data Analysis
+                </button>
+                <button class="btn btn-success" onclick="downloadResults()">
+                    ⬇️ Download Results
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 AutoML Pipeline. Powered by Python, Flask, and Scikit-Learn</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
