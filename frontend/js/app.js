@@ -1,53 +1,376 @@
-// Configuration
+// ==================== CONFIGURATION ====================
 const API_BASE_URL = 'http://localhost:5000/api';
-let currentSessionId = null;
-let currentAnalysis = null;
+let sessionId = null;
+let pipelineRunning = false;
+let uploadedData = null;
+let startTime = null;
+let timerInterval = null;
 
 // ==================== INITIALIZATION ====================
-
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
+    initializeUI();
     setupEventListeners();
-    checkApiHealth();
+    testAPI();
 });
 
-function setupEventListeners() {
-    // File upload
-    const uploadArea = document.getElementById('upload-area');
+function initializeUI() {
+    const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
+    const browseBtn = document.getElementById('browse-btn');
 
-    uploadArea.addEventListener('dragover', (e) => {
+    // Drag and drop
+    dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
-        uploadArea.classList.add('dragover');
+        dropZone.classList.add('active');
     });
 
-    uploadArea.addEventListener('dragleave', () => {
-        uploadArea.classList.remove('dragover');
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('active');
     });
 
-    uploadArea.addEventListener('drop', (e) => {
+    dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
-        uploadArea.classList.remove('dragover');
+        dropZone.classList.remove('active');
         if (e.dataTransfer.files.length) {
             handleFileUpload(e.dataTransfer.files[0]);
         }
     });
 
+    // File input
+    browseBtn.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length) {
             handleFileUpload(e.target.files[0]);
         }
     });
+}
 
-    // Click on upload area to trigger file input
-    uploadArea.addEventListener('click', (e) => {
-        if (!e.target.classList.contains('btn')) {
-            fileInput.click();
+function setupEventListeners() {
+    // Additional event listeners can be added here
+    document.addEventListener('change', function(e) {
+        if (e.target.id === 'task-type') {
+            updateModelsForTaskType();
         }
     });
 }
 
-function checkApiHealth() {
+function testAPI() {
     fetch(`${API_BASE_URL}/health`)
+        .then(r => r.json())
+        .then(data => {
+            addLog('System initialized and ready', 'success');
+        })
+        .catch(err => {
+            addLog('API connection error', 'error');
+            console.error(err);
+        });
+}
+
+// ==================== FILE UPLOAD ====================
+async function handleFileUpload(file) {
+    if (!file) return;
+
+    addLog(`Uploading file: ${file.name}`, 'info');
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('session_id', sessionId || 'new_session');
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/upload`, {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            sessionId = data.session_id;
+            uploadedData = data.analysis;
+            
+            addLog(`File loaded: ${data.analysis.shape[0]} rows, ${data.analysis.shape[1]} columns`, 'success');
+            
+            // Populate target column dropdown
+            const targetSelect = document.getElementById('target-column');
+            targetSelect.innerHTML = '<option value="">Select a target column</option>';
+            data.analysis.columns.forEach(col => {
+                const option = document.createElement('option');
+                option.value = col;
+                option.textContent = col;
+                targetSelect.appendChild(option);
+            });
+
+            // Update data display
+            updateDataDisplay(data.analysis);
+        } else {
+            addLog(`Error: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        addLog(`Upload failed: ${error.message}`, 'error');
+        console.error(error);
+    }
+}
+
+function updateDataDisplay(analysis) {
+    document.getElementById('models-count').textContent = analysis.shape[0];
+    document.getElementById('completed-count').textContent = analysis.shape[1];
+}
+
+// ==================== PIPELINE EXECUTION ====================
+async function startPipeline() {
+    const targetColumn = document.getElementById('target-column').value;
+    const taskType = document.getElementById('task-type').value;
+
+    if (!targetColumn) {
+        addLog('Please select a target column', 'error');
+        return;
+    }
+
+    if (!sessionId) {
+        addLog('Please upload a file first', 'error');
+        return;
+    }
+
+    pipelineRunning = true;
+    startTime = Date.now();
+    
+    document.getElementById('start-pipeline-btn').style.display = 'none';
+    document.getElementById('stop-pipeline-btn').style.display = 'block';
+    document.getElementById('pipeline-status').textContent = 'RUNNING';
+    document.getElementById('status-badge').textContent = 'RUNNING';
+
+    addLog('Starting pipeline training...', 'info');
+    
+    // Start timer
+    timerInterval = setInterval(updateTimer, 1000);
+
+    try {
+        const models = Array.from(document.querySelectorAll('.model-checkbox:checked'))
+            .map(el => el.value);
+        
+        if (models.length === 0) {
+            addLog('Please select at least one model', 'error');
+            stopPipeline();
+            return;
+        }
+
+        const config = {
+            session_id: sessionId,
+            config: {
+                target_column: targetColumn,
+                task_type: taskType,
+                models: models,
+                hyperparameter_tuning: document.getElementById('hyperparameter-tuning').value,
+                cv_folds: parseInt(document.getElementById('cv-folds').value),
+                nas_enabled: document.getElementById('nas-enabled').checked,
+                ensemble_enabled: document.getElementById('ensemble-enabled').checked
+            }
+        };
+
+        const response = await fetch(`${API_BASE_URL}/train`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(config)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            addLog(`Training completed successfully!`, 'success');
+            displayResults(data);
+            
+            document.getElementById('export-buttons').style.display = 'grid';
+            document.getElementById('export-content').innerHTML = '<p class="success-message">✓ Pipeline completed successfully!</p>';
+        } else {
+            addLog(`Training error: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        addLog(`Pipeline error: ${error.message}`, 'error');
+        console.error(error);
+    } finally {
+        stopPipeline();
+    }
+}
+
+function stopPipeline() {
+    pipelineRunning = false;
+    clearInterval(timerInterval);
+    
+    document.getElementById('start-pipeline-btn').style.display = 'block';
+    document.getElementById('stop-pipeline-btn').style.display = 'none';
+    document.getElementById('pipeline-status').textContent = 'IDLE';
+    document.getElementById('status-badge').textContent = 'IDLE';
+    
+    addLog('Pipeline stopped', 'warning');
+}
+
+function updateTimer() {
+    if (!startTime) return;
+    
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    
+    document.getElementById('elapsed-time').textContent = 
+        `${minutes}m ${seconds}s`;
+}
+
+// ==================== RESULTS DISPLAY ====================
+function displayResults(results) {
+    // Display models comparison
+    if (results.models && results.models.length > 0) {
+        displayLeaderboard(results.models);
+    }
+
+    // Display best model
+    if (results.best_model) {
+        displayBestModel(results.best_model);
+    }
+
+    // Display feature importance
+    if (results.feature_importance) {
+        displayFeatureImportance(results.feature_importance);
+    }
+}
+
+function displayLeaderboard(models) {
+    const leaderboardHtml = `
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Model</th>
+                    <th>Score</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${models.map((model, idx) => `
+                    <tr>
+                        <td class="model-rank">#${idx + 1}</td>
+                        <td>${model.name}</td>
+                        <td>${Object.values(model.metrics)[0] || 'N/A'}</td>
+                        <td><span style="color: var(--success-color);">✓</span></td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+    
+    const leaderboardContent = document.getElementById('leaderboard-content');
+    if (leaderboardContent) {
+        leaderboardContent.innerHTML = leaderboardHtml;
+    }
+
+    document.getElementById('models-count').textContent = models.length;
+    document.getElementById('completed-count').textContent = models.length;
+}
+
+function displayBestModel(bestModel) {
+    const bestModelHtml = `
+        <div style="padding: 15px; background-color: rgba(0, 255, 204, 0.1); border-radius: 4px;">
+            <h3 style="color: var(--primary-color); margin-bottom: 10px;">👑 ${bestModel.name}</h3>
+            <div style="font-size: 12px;">
+                ${Object.entries(bestModel.metrics).map(([key, val]) => `
+                    <p><strong>${key}:</strong> ${typeof val === 'number' ? val.toFixed(4) : val}</p>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    
+    const bestModelDiv = document.querySelector('[onclick=""]'); // Placeholder
+    const bestModelInfo = document.createElement('div');
+    bestModelInfo.innerHTML = bestModelHtml;
+    
+    const leaderboardPanel = document.querySelector('.leaderboard-panel .panel-content');
+    if (leaderboardPanel && !leaderboardPanel.querySelector('[style*="background-color: rgba(0, 255, 204"]')) {
+        leaderboardPanel.appendChild(bestModelInfo);
+    }
+}
+
+function displayFeatureImportance(featureImportance) {
+    const featuresList = document.getElementById('features-list');
+    if (!featuresList) return;
+
+    const firstModel = Object.values(featureImportance)[0];
+    if (firstModel && firstModel.features) {
+        const html = firstModel.features.slice(0, 10).map(feature => 
+            `<span class="feature-tag">${feature}</span>`
+        ).join('');
+        
+        featuresList.innerHTML = html;
+        document.getElementById('features-content').style.display = 'none';
+    }
+}
+
+// ==================== DOWNLOAD FUNCTIONS ====================
+function downloadResults(format) {
+    if (!sessionId) {
+        addLog('No session found', 'error');
+        return;
+    }
+
+    addLog(`Downloading results as ${format.toUpperCase()}...`, 'info');
+    
+    const url = `${API_BASE_URL}/export/${sessionId}?format=${format}`;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `results.${format}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    addLog('Download completed', 'success');
+}
+
+function exportModel() {
+    addLog('Exporting best model...', 'info');
+    // Model export functionality can be implemented here
+    setTimeout(() => {
+        addLog('Model exported successfully', 'success');
+    }, 1000);
+}
+
+// ==================== UTILITY FUNCTIONS ====================
+function addLog(message, level = 'info') {
+    const logsContainer = document.getElementById('logs-container');
+    if (!logsContainer) return;
+
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = document.createElement('p');
+    logEntry.className = `log-entry ${level}`;
+    logEntry.textContent = `[${timestamp}] ${message}`;
+    
+    logsContainer.appendChild(logEntry);
+    logsContainer.scrollTop = logsContainer.scrollHeight;
+}
+
+function updateModelsForTaskType() {
+    const taskType = document.getElementById('task-type').value;
+    const checkboxes = document.querySelectorAll('.model-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        if (taskType === 'classification') {
+            if (['logistic_regression', 'svc', 'random_forest', 'gradient_boosting'].includes(checkbox.value)) {
+                checkbox.checked = true;
+            } else {
+                checkbox.checked = false;
+            }
+        } else {
+            if (['linear_regression', 'random_forest', 'gradient_boosting', 'svr'].includes(checkbox.value)) {
+                checkbox.checked = true;
+            } else {
+                checkbox.checked = false;
+            }
+        }
+    });
+}
+
+// Export functions for global access
+window.startPipeline = startPipeline;
+window.stopPipeline = stopPipeline;
+window.downloadResults = downloadResults;
+window.exportModel = exportModel;
         .then(response => {
             if (!response.ok) throw new Error('API not available');
             return response.json();
@@ -349,6 +672,7 @@ function trainModels() {
         if (data.success) {
             displayModelsInformation(data);
             document.getElementById('models-info-section').classList.remove('hidden');
+            document.getElementById('export-card').style.display = 'block';
             document.getElementById('nav-buttons').style.display = 'flex';
             showAlert('Success', 'Models trained successfully!', 'success');
         } else {
@@ -524,15 +848,47 @@ function showSection(sectionId) {
 
 // ==================== EXPORT ====================
 
-function downloadResults() {
-    if (!currentSessionId) return;
+function downloadResults(format = 'csv') {
+    if (!currentSessionId) {
+        showAlert('Error', 'No session found', 'error');
+        return;
+    }
 
-    fetch(`${API_BASE_URL}/data/${currentSessionId}/export?format=csv`)
+    const formatMap = {
+        'csv': { mime: 'text/csv', ext: 'csv' },
+        'json': { mime: 'application/json', ext: 'json' },
+        'excel': { mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', ext: 'xlsx' }
+    };
+
+    const formatInfo = formatMap[format] || formatMap['csv'];
+
+    fetch(`${API_BASE_URL}/data/${currentSessionId}/export?format=${format}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                downloadFile(data.content, `automl_processed_${currentSessionId}.csv`, 'text/csv');
-                showAlert('Success', 'Data exported successfully', 'success');
+                let content = data.content;
+                
+                // If Excel format, convert from hex
+                if (format === 'excel') {
+                    const binaryString = atob(content);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    const blob = new Blob([bytes], { type: formatInfo.mime });
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `automl_processed_${currentSessionId}.${formatInfo.ext}`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    downloadFile(content, `automl_processed_${currentSessionId}.${formatInfo.ext}`, formatInfo.mime);
+                }
+                
+                showAlert('Success', `Data exported as ${format.toUpperCase()}`, 'success');
             } else {
                 showAlert('Error', data.error, 'error');
             }

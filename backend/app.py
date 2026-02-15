@@ -1,9 +1,12 @@
-from flask import Flask, request, jsonify, send_from_directory, render_template_string
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
 import json
+import uuid
 import hashlib
+import threading
+from datetime import datetime
 from utils.data_handler import DataHandler
 from utils.ml_pipeline import MLPipeline
 from config import config
@@ -284,7 +287,7 @@ def scale_features(session_id):
 
 @app.route('/api/data/<session_id>/export', methods=['GET'])
 def export_data(session_id):
-    """Export processed data"""
+    """Export processed data in multiple formats"""
     try:
         if session_id not in data_handlers:
             return jsonify({'success': False, 'error': 'Session not found'}), 404
@@ -299,7 +302,8 @@ def export_data(session_id):
         return jsonify({
             'success': True,
             'content': content,
-            'format': fmt
+            'format': fmt,
+            'message': f'Data exported as {fmt.upper()}'
         }), 200
     
     except Exception as e:
@@ -307,9 +311,52 @@ def export_data(session_id):
 
 # ==================== ML PIPELINE ROUTES ====================
 
+@app.route('/api/train', methods=['POST'])
+def train_pipeline():
+    """Train ML pipeline with new configuration format"""
+    try:
+        data = request.get_json()
+        session_id = data.get('session_id')
+        config_data = data.get('config', {})
+        
+        if not session_id or session_id not in data_handlers:
+            return jsonify({'error': 'Invalid or missing session'}), 400
+        
+        handler = data_handlers[session_id]
+        target_column = config_data.get('target_column')
+        task_type = config_data.get('task_type', 'classification')
+        models = config_data.get('models', ['random_forest', 'gradient_boosting'])
+        
+        if not target_column or target_column not in handler.df.columns:
+            return jsonify({'error': 'Invalid target column'}), 400
+        
+        # Initialize and train pipeline
+        pipeline = MLPipeline(
+            task_type=task_type,
+            models=models,
+            hyperparameter_tuning=config_data.get('hyperparameter_tuning', 'none'),
+            cv_folds=config_data.get('cv_folds', 5),
+            nas_enabled=config_data.get('nas_enabled', False),
+            ensemble_enabled=config_data.get('ensemble_enabled', False)
+        )
+        
+        results = pipeline.train(handler.df, target_column)
+        pipelines[session_id] = pipeline
+        
+        return jsonify({
+            'status': 'success',
+            'models': results['models'],
+            'best_model': results['best_model'],
+            'feature_importance': results.get('feature_importance'),
+            'elapsed_time': results.get('elapsed_time', 0)
+        }), 200
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/ml/<session_id>/train', methods=['POST'])
 def train_models(session_id):
-    """Train machine learning models"""
+    """Train machine learning models (legacy endpoint)"""
     try:
         if session_id not in data_handlers:
             return jsonify({'success': False, 'error': 'Session not found'}), 404

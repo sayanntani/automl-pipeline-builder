@@ -1,52 +1,169 @@
-# AutoML Pipeline - Quick Start Guide
+# Quick Start Guide - AutoML Pipeline Builder
 
-## 🎯 Quick Setup (2 minutes)
+Get the **Advanced AutoML Pipeline Builder** up and running in less than 5 minutes!
+
+## ⚡ Super Fast Setup (2 Minutes)
 
 ### Windows Users
-1. Navigate to the AUTO folder
-2. Double-click **START_SERVER.bat**
-3. Wait for "Running on http://127.0.0.1:5000" message
-4. Open **frontend/index.html** in your browser (double-click)
-5. You're ready to go! 🚀
+```bash
+# Option 1: Run the batch script
+START_SERVER.bat
+
+# Then in another terminal:
+cd frontend
+python -m http.server 8000
+```
+
+Visit: **http://localhost:8000**
 
 ### macOS/Linux Users
-1. Open terminal in the AUTO folder
-2. Run: `bash START_SERVER.sh`
-3. Wait for "Running on http://127.0.0.1:5000" message
-4. Open **frontend/index.html** in your browser
-5. You're ready to go! 🚀
+```bash
+# Option 1: Run the shell script
+bash START_SERVER.sh
+
+# Then in another terminal:
+cd frontend
+python3 -m http.server 8000
+```
+
+Visit: **http://localhost:8000**
 
 ---
 
-## 📊 Test with Sample Data
+## 📋 Manual 5-Minute Setup
 
-A **sample_data.csv** file is included to test the application:
+### Step 1: Install Dependencies
+```bash
+cd backend
+pip install -r requirements.txt
+```
 
-1. Start the server (see Quick Setup above)
-2. Upload **sample_data.csv**
-3. Process the data:
-   - Handle missing values (mean strategy)
-   - Remove duplicates
-   - Encode categorical (Department column)
-   - Scale features
-4. Train models with target: **Salary**
-5. View results and comparison
+### Step 2: Start Backend Server (Terminal 1)
+```bash
+cd backend
+python app.py
+```
+
+Expected output:
+```
+ * Running on http://127.0.0.1:5000
+```
+
+### Step 3: Start Frontend Server (Terminal 2)
+```bash
+cd frontend
+python -m http.server 8000
+```
+
+Expected output:
+```
+Serving HTTP on http://0.0.0.0:8000
+```
+
+### Step 4: Open Web App
+Visit in your browser: **http://localhost:8000**
 
 ---
 
-## 🎓 What You Can Do
+## 🎯 Test With Sample Data
 
-### Upload Your Data
-- CSV files (.csv)
-- Excel files (.xlsx, .xls)
-- Up to 50MB in size
+### Using sample_data.csv:
+1. Click "BROWSE FILES" button
+2. Select `sample_data.csv` from project folder
+3. Choose Configuration:
+   - **Task Type:** Classification
+   - **Target Column:** Select your target variable
+4. Click "START PIPELINE"
+5. Wait for training to complete
+6. Review results in the leaderboard
 
-### Automatic Data Cleaning
-- ✅ Detect and handle missing values
-- ✅ Remove duplicate rows
-- ✅ Encode categorical variables
-- ✅ Scale numeric features
-- ✅ View data statistics and preview
+---
+
+## 🚀 What's Happening
+
+### Backend (Port 5000)
+- REST API server
+- Data processing
+- Model training
+- ML pipeline execution
+
+### Frontend (Port 8000)
+- Web interface
+- Configuration panels
+- Real-time monitoring
+- Results visualization
+
+---
+
+## 📊 Key Features Ready to Use
+
+✅ **8 ML Algorithms** (Classification & Regression)  
+✅ **Neural Architecture Search** (NAS)  
+✅ **Hyperparameter Tuning** (Grid Search)  
+✅ **Ensemble Generation**  
+✅ **6 Data Imputation Methods**  
+✅ **Feature Scaling & Encoding**  
+✅ **Real-time Metrics & Monitoring**  
+✅ **Result Export** (CSV, JSON)  
+
+---
+
+## ❌ Troubleshooting
+
+### "Can't connect to backend"
+```bash
+# Verify Flask is running
+# Terminal should show "Running on http://127.0.0.1:5000"
+
+# If port 5000 is in use:
+python app.py --port 5001
+```
+
+### "ModuleNotFoundError: No module named..."
+```bash
+# Reinstall dependencies
+pip install --force-reinstall -r backend/requirements.txt
+```
+
+### "Frontend shows blank page"
+```bash
+# Hard refresh your browser
+# Windows/Linux: Ctrl + Shift + R
+# Mac: Cmd + Shift + R
+```
+
+### "File upload fails"
+- Check file format (CSV, Excel, JSON only)
+- Verify file size is under 100MB
+- Use UTF-8 encoding for CSV files
+
+---
+
+## 📖 Next Steps
+
+Once you've tested:
+1. Read **[SETUP_GUIDE.md](SETUP_GUIDE.md)** for detailed configuration
+2. Check **[README.md](README.md)** for all features
+3. Review **[ARCHITECTURE.md](ARCHITECTURE.md)** for system design
+4. Prepare your own dataset and test!
+
+---
+
+## 🎓 First Time Using?
+
+### Recommended Workflow:
+1. **Upload** your dataset (CSV/Excel)
+2. **Configure** target column and preprocessing options
+3. **Select** models to train (start with defaults)
+4. **Monitor** training progress in real-time
+5. **Review** leaderboard and feature importance
+6. **Export** results for further analysis
+
+---
+
+**That's it!** 🎉 You now have a production-ready AutoML system running locally.
+
+For issues or questions, see [SETUP_GUIDE.md - Troubleshooting](SETUP_GUIDE.md#-troubleshooting)
 
 ### Train ML Models
 - ✅ Automatically train 4 different algorithms

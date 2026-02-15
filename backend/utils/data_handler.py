@@ -203,7 +203,7 @@ class DataHandler:
         return preview
     
     def export_data(self, file_format='csv'):
-        """Export processed data"""
+        """Export processed data in multiple formats"""
         if self.df is None:
             return None, "No data to export"
         
@@ -212,6 +212,13 @@ class DataHandler:
                 return self.df.to_csv(index=False), 'csv'
             elif file_format == 'json':
                 return self.df.to_json(orient='records'), 'json'
+            elif file_format == 'excel':
+                # Excel export
+                excel_buffer = io.BytesIO()
+                with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+                    self.df.to_excel(writer, sheet_name='Data', index=False)
+                excel_buffer.seek(0)
+                return excel_buffer.getvalue().hex(), 'excel'
             else:
                 return None, f"Unsupported format: {file_format}"
         except Exception as e:

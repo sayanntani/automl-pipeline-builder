@@ -3,46 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoML Pipeline - Automated Machine Learning</title>
+    <title>AutoML Pipeline Builder - Advanced Machine Learning</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-    <nav class="navbar">
-        <div class="container">
-            <div class="navbar-brand">
-                <h1>🤖 AutoML Pipeline</h1>
-                <p>Automated Machine Learning Made Easy</p>
-            </div>
-            <div class="navbar-info">
-                <span id="session-info">Ready to upload</span>
-            </div>
+<body class="dark-theme">
+    <header class="header">
+        <div class="header-content">
+            <h1 class="title">AutoML Pipeline Builder</h1>
+            <p class="subtitle">Automated Machine Learning Pipeline with Neural Architecture Search & Ensemble Generation</p>
+            <span class="status-badge" id="status-badge">IDLE</span>
         </div>
-    </nav>
+    </header>
 
-    <div class="container">
-        <!-- Upload Section -->
-        <section id="upload-section" class="section active">
-            <div class="section-header">
-                <h2>Step 1: Upload Your Data</h2>
-                <p>Upload a CSV or Excel file to begin the AutoML pipeline</p>
-            </div>
+    <div class="main-container">
+        <div class="grid-container">
+            <!-- 1. Dataset Upload Section -->
+            <section class="panel dataset-panel">
+                <div class="panel-header">
+                    <h2>Dataset Upload</h2>
+                    <span class="panel-status">IDLE</span>
+                </div>
+                <div class="panel-content">
+                    <div class="drop-zone" id="drop-zone">
+                        <div class="drop-icon">📊</div>
+                        <p>Drag & drop your dataset or click to browse</p>
+                        <p class="small">Supports CSV, Excel, JSON formats</p>
+                        <button class="btn btn-primary" id="browse-btn">BROWSE FILES</button>
+                    </div>
+                    <input type="file" id="file-input" accept=".csv,.xlsx,.xls,.json" hidden>
+                    <div id="file-progress" class="hidden">
+                        <div class="progress-bar">
+                            <div id="progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-            <div class="upload-area" id="upload-area">
-                <div class="upload-icon">📁</div>
-                <h3>Drag and drop your file here</h3>
-                <p>or</p>
-                <label for="file-input" class="btn btn-primary">Browse Files</label>
-                <input type="file" id="file-input" accept=".csv,.xlsx,.xls" hidden>
-                <p class="upload-info">Supported formats: CSV, Excel (.xlsx, .xls)</p>
-            </div>
+            <!-- 2. Pipeline Configuration Section -->
+            <section class="panel config-panel">
+                <div class="panel-header">
+                    <h2>Pipeline Configuration</h2>
+                </div>
+                <div class="panel-content">
+                    <!-- Task Type -->
+                    <div class="config-group">
+                        <label>TASK TYPE</label>
+                        <select id="task-type" class="form-select">
+                            <option value="classification">Classification</option>
+                            <option value="regression">Regression</option>
+                        </select>
+                    </div>
 
-            <div id="upload-loading" class="loading hidden">
-                <div class="spinner"></div>
-                <p>Uploading and analyzing your data...</p>
-            </div>
+                    <!-- Target Column -->
+                    <div class="config-group">
+                        <label>TARGET COLUMN</label>
+                        <select id="target-column" class="form-select">
+                            <option value="">Select a target column</option>
+                        </select>
+                    </div>
 
-            <div id="upload-error" class="alert alert-error hidden"></div>
-        </section>
+                    <!-- Preprocessing Options -->
+                    <div class="config-group">
+                        <label>PREPROCESSING OPTIONS</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="handle-missing" checked> HANDLE MISSING VALUES
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="scale-features" checked> FEATURE SCALING
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="encode-categorical" checked> ENCODE CATEGORICAL
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Feature Selection -->
+                    <div class="config-group">
+                        <label>FEATURE SELECTION METHOD</label>
+                        <select id="feature-selection" class="form-select">
+                            <option value="automatic">Automatic</option>
+                            <option value="correlation">Correlation Based</option>
+                            <option value="manual">Manual</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Model Selection Section -->
+            <section class="panel models-panel">
+                <div class="panel-header">
+                    <h2>Model Selection</h2>
+                </div>
+                <div class="panel-content">
+                    <!-- Models to Try -->
+                    <div class="config-group">
+                        <label>MODELS TO TRY</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="model-checkbox" value="random_forest" checked> RANDOM FOREST
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="model-checkbox" value="gradient_boosting" checked> GRADIENT BOOSTING
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="model-checkbox" value="xgboost" checked> XGBOOST
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="model-checkbox" value="logistic_regression"> LOGISTIC REGRESSION
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="model-checkbox" value="svm"> SVM
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="model-checkbox" value="neural_network"> NEURAL NETWORK
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Hyperparameter Tuning -->
+                    <div class="config-group">
+                        <label>HYPERPARAMETER TUNING</label>
+                        <select id="hyperparameter-tuning" class="form-select">
+                            <option value="none">None</option>
+                            <option value="grid_search">Grid Search</option>
+                            <option value="random_search">Random Search</option>
+                        </select>
+                    </div>
+
+                    <!-- Cross-Validation -->
+                    <div class="config-group">
+                        <label>CROSS-VALIDATION FOLDS</label>
+                        <input type="number" id="cv-folds" value="5" min="2" max="10" class="form-input">
+                    </div>
+
+                    <!-- Advanced Options -->
+                    <div class="config-group">
+                        <label>ADVANCED OPTIONS</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="nas-enabled"> NEURAL ARCHITECTURE SEARCH
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="ensemble-enabled"> GENERATE ENSEMBLE MODELS
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. Pipeline Control Section -->
+            <section class="panel control-panel">
+                <div class="panel-header">
+                    <h2>Pipeline Control</h2>
+                    <span class="panel-status" id="pipeline-status">READY</span>
+                </div>
+                <div class="panel-content">
+                    <div class="control-stats">
+                        <div class="stat">
+                            <div class="stat-icon">⚙️</div>
+                            <div class="stat-value" id="models-count">0</div>
+                            <div class="stat-label">MODELS TRAINING</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-icon">✓</div>
+                            <div class="stat-value" id="completed-count">0</div>
+                            <div class="stat-label">COMPLETED</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-icon">⏱️</div>
+                            <div class="stat-value" id="elapsed-time">0s</div>
+                            <div class="stat-label">ELAPSED TIME</div>
+                        </div>
+                    </div>
+
+                    <div class="control-buttons">
+                        <button class="btn btn-success btn-large" id="start-pipeline-btn" onclick="startPipeline()">
+                            START PIPELINE
+                        </button>
+                        <button class="btn btn-danger" id="stop-pipeline-btn" onclick="stopPipeline()" style="display:none;">
+                            STOP
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. Performance Leaderboard -->
+            <section class="panel leaderboard-panel">
+                <div class="panel-header">
+                    <h2>Performance Leaderboard</h2>
+                </div>
+                <div class="panel-content">
+                    <div id="leaderboard-content">
+                        <p class="empty-state">No models trained yet. Start the pipeline to see results.</p>
+                    </div>
+                    <div id="leaderboard-table"></div>
+                </div>
+            </section>
+
+            <!-- 6. Selected Features -->
+            <section class="panel features-panel">
+                <div class="panel-header">
+                    <h2>Selected Features</h2>
+                </div>
+                <div class="panel-content">
+                    <div id="features-content">
+                        <p class="empty-state">Features will appear after preprocessing</p>
+                    </div>
+                    <div id="features-list" class="features-list"></div>
+                </div>
+            </section>
+
+            <!-- 7. Pipeline Logs -->
+            <section class="panel logs-panel">
+                <div class="panel-header">
+                    <h2>Pipeline Logs</h2>
+                </div>
+                <div class="panel-content">
+                    <div id="logs-container" class="logs-container">
+                        <p class="log-entry">[00:00:00] System initialized and ready</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 8. Export & Deploy -->
+            <section class="panel export-panel">
+                <div class="panel-header">
+                    <h2>Export & Deploy</h2>
+                </div>
+                <div class="panel-content">
+                    <div id="export-content">
+                        <p class="empty-state">Complete the pipeline to export models</p>
+                    </div>
+                    <div class="export-buttons" id="export-buttons" style="display:none;">
+                        <button class="btn btn-primary" onclick="exportModel()">📦 Export Best Model</button>
+                        <button class="btn btn-primary" onclick="downloadResults('csv')">📄 Download Results CSV</button>
+                        <button class="btn btn-primary" onclick="downloadResults('json')">📋 Download Results JSON</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
 
         <!-- Data Analysis Section -->
         <section id="analysis-section" class="section hidden">
@@ -220,9 +426,23 @@
                 <button class="btn btn-secondary" onclick="goToAnalysisSection()">
                     ← Back: Data Analysis
                 </button>
-                <button class="btn btn-success" onclick="downloadResults()">
-                    ⬇️ Download Results
-                </button>
+            </div>
+
+            <!-- Export Options -->
+            <div class="card" id="export-card" style="display: none;">
+                <h3>📥 Export Processed Data</h3>
+                <p>Download your cleaned and processed data in your preferred format:</p>
+                <div class="export-buttons">
+                    <button class="btn btn-success" onclick="downloadResults('csv')">
+                        📄 Download as CSV
+                    </button>
+                    <button class="btn btn-success" onclick="downloadResults('excel')">
+                        📊 Download as Excel
+                    </button>
+                    <button class="btn btn-success" onclick="downloadResults('json')">
+                        📋 Download as JSON
+                    </button>
+                </div>
             </div>
         </section>
     </div>

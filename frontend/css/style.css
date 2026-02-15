@@ -1,53 +1,545 @@
+/* ==================== ROOT VARIABLES ==================== */
+:root {
+    --primary-color: #00ffcc;
+    --primary-dark: #00cc99;
+    --secondary-color: #1a2332;
+    --background-dark: #0f1419;
+    --background-darker: #0a0e12;
+    --border-color: #1e3a4d;
+    --text-primary: #ffffff;
+    --text-secondary: #8999ac;
+    --success-color: #00ffcc;
+    --danger-color: #ff3366;
+    --warning-color: #ffaa00;
+    --info-color: #00ccff;
+}
+
+/* ==================== BASE STYLES ==================== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-:root {
-    --primary-color: #3b82f6;
-    --secondary-color: #10b981;
-    --danger-color: #ef4444;
-    --warning-color: #f59e0b;
-    --info-color: #0ea5e9;
-    --dark-color: #1f2937;
-    --light-color: #f9fafb;
-    --border-color: #e5e7eb;
-    --text-color: #374151;
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f3f4f6;
-    color: var(--text-color);
+    font-family: 'Courier New', monospace;
+    background-color: var(--background-darker);
+    color: var(--text-primary);
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
-.container {
-    max-width: 1200px;
+body.dark-theme {
+    background: linear-gradient(135deg, var(--background-darker) 0%, var(--secondary-color) 100%);
+    color: var(--text-primary);
+}
+
+/* ==================== HEADER ==================== */
+.header {
+    background: linear-gradient(135deg, rgba(0, 255, 204, 0.1) 0%, rgba(0, 204, 153, 0.05) 100%);
+    border-bottom: 2px solid var(--primary-color);
+    padding: 40px 20px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header-content {
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 20px;
 }
 
-/* ==================== NAVBAR ==================== */
-.navbar {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #1e40af 100%);
-    color: white;
-    padding: 20px 0;
-    box-shadow: var(--shadow-md);
-    margin-bottom: 40px;
+.title {
+    font-size: 48px;
+    font-weight: bold;
+    color: var(--primary-color);
+    text-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+    margin-bottom: 10px;
+    letter-spacing: 2px;
 }
 
-.navbar .container {
+.subtitle {
+    font-size: 18px;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: var(--primary-dark);
+    color: var(--background-darker);
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+/* ==================== MAIN CONTAINER ==================== */
+.main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    auto-rows: max-content;
+}
+
+@media (max-width: 1200px) {
+    .grid-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==================== PANEL STYLES ==================== */
+.panel {
+    background-color: var(--secondary-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+}
+
+.panel-header {
+    background: linear-gradient(135deg, rgba(0, 255, 204, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%);
+    border-bottom: 1px solid var(--border-color);
+    padding: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.navbar-brand h1 {
+.panel-header h2 {
+    font-size: 18px;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+.panel-status {
+    font-size: 11px;
+    padding: 4px 12px;
+    background-color: var(--primary-dark);
+    color: var(--background-darker);
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+.panel-content {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==================== DROP ZONE ==================== */
+.drop-zone {
+    border: 2px dashed var(--primary-color);
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: rgba(0, 255, 204, 0.05);
+}
+
+.drop-zone:hover {
+    background-color: rgba(0, 255, 204, 0.15);
+    border-color: var(--primary-dark);
+}
+
+.drop-zone.active {
+    background-color: rgba(0, 255, 204, 0.3);
+    border-color: var(--primary-dark);
+}
+
+.drop-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.drop-zone p {
+    color: var(--text-secondary);
+    margin: 8px 0;
+}
+
+.drop-zone p.small {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* ==================== FORM ELEMENTS ==================== */
+.config-group {
+    margin-bottom: 15px;
+}
+
+.config-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+.form-select,
+.form-input {
+    width: 100%;
+    padding: 10px 12px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus,
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+}
+
+.form-select option {
+    background-color: var(--secondary-color);
+    color: var(--text-primary);
+}
+
+/* ==================== CHECKBOX STYLES ==================== */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+.checkbox-label:hover {
+    color: var(--primary-color);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin-right: 10px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+/* ==================== BUTTONS ==================== */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: inherit;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--background-darker);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 255, 204, 0.3);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.btn-secondary:hover {
+    background-color: rgba(0, 255, 204, 0.1);
+    box-shadow: 0 0 8px rgba(0, 255, 204, 0.2);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    color: var(--background-darker);
+}
+
+.btn-success:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #ff1a52;
+}
+
+.btn-large {
+    padding: 15px 30px;
+    font-size: 14px;
+    width: 100%;
+}
+
+#browse-btn {
+    margin-top: 15px;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 15px;
+}
+
+/* ==================== CONTROL STATS ==================== */
+.control-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-icon {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.stat-label {
+    font-size: 10px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 5px;
+}
+
+/* ==================== LEADERBOARD ==================== */
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.leaderboard-table thead {
+    background-color: rgba(0, 255, 204, 0.1);
+}
+
+.leaderboard-table th {
+    padding: 10px;
+    text-align: left;
+    font-size: 11px;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-color);
+    font-weight: bold;
+}
+
+.leaderboard-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 13px;
+}
+
+.leaderboard-table tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.model-rank {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+/* ==================== FEATURES LIST ==================== */
+.features-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.feature-tag {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: rgba(0, 255, 204, 0.1);
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--primary-color);
+}
+
+/* ==================== LOGS CONTAINER ==================== */
+.logs-container {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    padding: 10px;
+    height: 200px;
+    overflow-y: auto;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+}
+
+.log-entry {
+    color: var(--primary-color);
+    margin: 3px 0;
+    word-break: break-word;
+}
+
+.log-entry.error {
+    color: var(--danger-color);
+}
+
+.log-entry.warning {
+    color: var(--warning-color);
+}
+
+.log-entry.success {
+    color: var(--success-color);
+}
+
+/* ==================== PROGRESS BAR ==================== */
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+#progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* ==================== EXPORT BUTTONS ==================== */
+.export-buttons {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.export-buttons .btn {
+    width: 100%;
+}
+
+/* ==================== EMPTY STATE ==================== */
+.empty-state {
+    color: var(--text-secondary);
+    font-size: 13px;
+    text-align: center;
+    padding: 20px;
+}
+
+/* ==================== UTILITIES ==================== */
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mt-10 {
+    margin-top: 10px;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+/* ==================== SCROLLBAR ==================== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+.animate-glow {
+    animation: glow 2s infinite;
+}
+
     font-size: 28px;
     margin-bottom: 5px;
 }
@@ -637,4 +1129,25 @@ body {
 
 .mb-20 {
     margin-bottom: 20px;
+}
+
+/* ==================== EXPORT BUTTONS ==================== */
+.export-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.export-buttons .btn {
+    padding: 15px;
+    text-align: center;
+    font-size: 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.export-buttons .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
 }
