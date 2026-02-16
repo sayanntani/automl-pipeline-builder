@@ -1,36 +1,56 @@
-AUTO/
-│
-├── backend/
-│   ├── app.py
-│   ├── config.py
-│   └── utils/
-│
-├── frontend/
-│   ├── index.html
-│   ├── css/
-│   └── js/
-│
-├── sample_data.csv
-└── README.md
-python -m venv venv
-venv\Scripts\activate   # Windows
-pip install -r backend/requirements.txt
+AutoML Pipeline Builder
 
-cd backend
-python app.py
+This is a web-based AutoML system I built to understand how real-world machine learning pipelines work.
 
-cd ../frontend
-python -m http.server 8000
-What I Learned From This
+Instead of manually doing preprocessing, model selection, tuning, and evaluation every time, I wanted to create something that automates the full workflow in one place.
 
-How to structure an ML project properly
+This project is my attempt to combine Machine Learning + Backend + Frontend into one complete system.
 
-Connecting frontend and backend using APIs
+>>>> Why I Built This
 
-Writing modular ML pipelines
+While learning ML, I realized most tutorials stop at training one model in a notebook.
+But in real projects, we need:
 
-Managing project structure cleanly
+Data cleaning
 
-Thinking about scalability instead of just writing notebook code
+Feature engineering
 
-This project is still evolving, and I plan to keep improving it as I learn more.
+Multiple model comparison
+
+Hyperparameter tuning
+
+Proper evaluation
+
+So instead of repeating these steps manually, I tried to automate everything into a reusable pipeline.
+
+This project helped me understand how ML systems actually work beyond just theory.
+
+>>>> What It Can Do
+
+Automatically detects whether the task is Classification or Regression
+
+Trains multiple models and compares them
+
+Performs hyperparameter tuning (Grid Search / Random Search)
+
+Handles missing values, encoding, scaling, and feature selection
+
+Generates performance metrics and leaderboard
+
+Shows training progress
+
+I also experimented with Neural Networks and ensemble models to explore more advanced ideas.
+
+🛠 Tech Stack
+
+Backend
+Python
+Flask
+Scikit-learn
+XGBoost
+Pandas / NumPy
+TensorFlow (for neural networks)
+Frontend
+HTML
+CSS
+JavaScript

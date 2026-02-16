@@ -371,62 +371,6 @@ window.startPipeline = startPipeline;
 window.stopPipeline = stopPipeline;
 window.downloadResults = downloadResults;
 window.exportModel = exportModel;
-        .then(response => {
-            if (!response.ok) throw new Error('API not available');
-            return response.json();
-        })
-        .catch(error => {
-            showAlert('API Connection Error', 'Cannot connect to backend API. Make sure the Flask server is running on http://localhost:5000', 'error');
-            console.error('Health check failed:', error);
-        });
-}
-
-// ==================== FILE UPLOAD ====================
-
-function handleFileUpload(file) {
-    const allowedTypes = ['text/csv', 'application/vnd.ms-excel', 
-                         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-    
-    if (!allowedTypes.includes(file.type) && !file.name.endsWith('.csv')) {
-        showAlert('Invalid File Type', 'Please upload a CSV or Excel file', 'error');
-        return;
-    }
-
-    if (file.size > 50 * 1024 * 1024) {
-        showAlert('File Too Large', 'Maximum file size is 50MB', 'error');
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    showLoading('upload-loading', true);
-
-    fetch(`${API_BASE_URL}/upload`, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        showLoading('upload-loading', false);
-        
-        if (data.success) {
-            currentSessionId = data.session_id;
-            currentAnalysis = data.analysis;
-            updateSessionInfo(data.session_id);
-            displayDataAnalysis(data);
-            showSection('analysis-section');
-            showAlert('Success', `Data uploaded successfully! File: ${currentSessionId}`, 'info');
-        } else {
-            showAlert('Upload Error', data.error, 'error');
-        }
-    })
-    .catch(error => {
-        showLoading('upload-loading', false);
-        showAlert('Upload Error', `Failed to upload file: ${error.message}`, 'error');
-        console.error('Upload error:', error);
-    });
-}
 
 // ==================== DATA ANALYSIS ====================
 
