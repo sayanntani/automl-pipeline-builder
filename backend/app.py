@@ -13,12 +13,12 @@ from config import config
 
 app = Flask(__name__)
 
-# Secure CORS configuration - only allow localhost
+# CORS configuration - allow all origins for deployment
 cors_config = {
-    "origins": ["http://localhost:5000", "http://127.0.0.1:5000", "http://localhost", "http://127.0.0.1"],
+    "origins": "*",
     "methods": ["GET", "POST", "OPTIONS"],
     "allow_headers": ["Content-Type", "Authorization"],
-    "supports_credentials": True,
+    "supports_credentials": False,
     "max_age": 3600
 }
 CORS(app, resources={r"/api/*": cors_config})
@@ -448,4 +448,6 @@ def internal_error(error):
     return jsonify({'success': False, 'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.getenv('PORT', 5000))
+    debug = os.getenv('FLASK_ENV', 'development') == 'development'
+    app.run(debug=debug, host='0.0.0.0', port=port)
